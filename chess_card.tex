@@ -3,6 +3,7 @@
 \usepackage{tikz}
 \usepackage{xskak}
 \usepackage{graphicx}
+\usetikzlibrary{positioning, chains, arrows.meta, shapes.geometric}
 
 \pagestyle{empty}
 
@@ -11,7 +12,21 @@
 
 \begin{document}
 \centering
-\begin{tikzpicture}[x=0.5in,y=0.5in]
+\begin{tikzpicture}[x=0.5in,y=0.5in,
+    % Define a style for our waypoints (optional, but good for visualization)
+    waypoint/.style={
+        circle,
+        fill,
+        inner sep=0.5pt
+    },
+    % Define a style for the bent arrow
+    bentArrow/.style={
+        ->, % Arrow tip at the end of the path
+        thick,
+        rounded corners=8pt, % Makes the bends look smooth
+        color=red
+    }
+]
   % Set explicit bounding box
   \useasboundingbox (0,0) rectangle (6,6);
   \def\cardsize{6}
@@ -62,6 +77,25 @@
           \ifnum\x=6 \WhitePawnOnWhite\fi
           \ifnum\x=7 \WhitePawnOnBlack\fi
         };
+      }
+
+      % Castling indicators (arrows showing piece movements)
+      % Queenside: King (x=4) → c-file (x=2), Rook (x=0) → d-file (x=3)
+      % Kingside: King (x=4) → g-file (x=6), Rook (x=7) → f-file (x=5)
+      \foreach \startfile/\endfile in {4/2, 0/3, 4/6, 7/5} {
+        \pgfmathsetmacro{\startx}{\startfile * \squaresize + \squaresize/2}
+        \pgfmathsetmacro{\starty}{1*\squaresize}
+        \pgfmathsetmacro{\endx}{\endfile * \squaresize + \squaresize/2}
+        \pgfmathsetmacro{\endy}{1*\squaresize}
+        \pgfmathsetmacro{\midy}{0.6*\squaresize}
+
+        % --- Define some waypoints using nodes ---
+        \node[waypoint] (P1) at (\startx, \starty) {};
+        \node[waypoint] (P2) at (\startx, \midy) {};
+        \node[waypoint] (P3) at (\endx, \midy) {};
+        \node[waypoint] (P4) at (\endx, \endy) {};
+    
+        \draw[bentArrow, thick, rotate=\angle] (P1) -- (P2) -- (P3) -- (P4);
       }
     \end{scope}
   }

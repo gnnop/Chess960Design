@@ -1,0 +1,71 @@
+\documentclass[12pt]{article}
+\usepackage[margin=0.0in,paperwidth=3in,paperheight=3in]{geometry}
+\usepackage{tikz}
+\usepackage{xskak}
+\usepackage{graphicx}
+
+\pagestyle{empty}
+
+\definecolor{lightgray}{gray}{0.8}
+\definecolor{darkgray}{gray}{0.8}
+
+\begin{document}
+\centering
+\begin{tikzpicture}[x=0.5in,y=0.5in]
+  % Set explicit bounding box
+  \useasboundingbox (0,0) rectangle (6,6);
+  \def\cardsize{6}
+  \def\squaresize{\fpeval{6/11}} % Size of each square
+  
+  \node[align=center] at (3 , 3) {\textbf{CHESS}\\ \textbf{960}};
+
+  % Loop through 4 corners with rotations: 0°, 90°, 180°, 270°
+  \foreach \corner in {0,1,2,3} {
+    \pgfmathtruncatemacro{\angle}{\corner * 90}
+    % Determine corner positions: (0,0), (6,0), (6,6), (0,6)
+    \pgfmathsetmacro{\cornerx}{(\corner==1 || \corner==2) ? \cardsize : 0}
+    \pgfmathsetmacro{\cornery}{(\corner==2 || \corner==3) ? \cardsize : 0}
+
+    \begin{scope}[rotate around={\angle:(\cornerx,\cornery)}, shift={(\cornerx,\cornery)}]
+      % Draw chess setup starting from (0,0) going right
+      \foreach \x in {0,...,7} {
+        \pgfmathsetmacro{\xpos}{\x * \squaresize + \squaresize/2}
+        % Draw squares (2 rows)
+        \pgfmathtruncatemacro{\colormod}{mod(\x,2)}
+        \ifnum\colormod=0
+          \fill[darkgray] (\x*\squaresize, 1*\squaresize) rectangle (\x*\squaresize+\squaresize, 2*\squaresize);
+          \fill[lightgray] (\x*\squaresize, 2*\squaresize) rectangle (\x*\squaresize+\squaresize, 3*\squaresize);
+        \else
+          \fill[lightgray] (\x*\squaresize, 1*\squaresize) rectangle (\x*\squaresize+\squaresize, 2*\squaresize);
+          \fill[darkgray] (\x*\squaresize, 2*\squaresize) rectangle (\x*\squaresize+\squaresize, 3*\squaresize);
+        \fi
+        % Place pieces on squares with white backgrounds
+        \node[rotate=\angle] at (\xpos, \fpeval{(6/11)*(3/2)}) {
+          \small
+          \ifnum\x=0 \WhiteRookOnBlack\fi
+          \ifnum\x=1 \WhiteKnightOnWhite\fi
+          \ifnum\x=2 \WhiteBishopOnBlack\fi
+          \ifnum\x=3 \WhiteQueenOnWhite\fi
+          \ifnum\x=4 \WhiteKingOnBlack\fi
+          \ifnum\x=5 \WhiteBishopOnWhite\fi
+          \ifnum\x=6 \WhiteKnightOnBlack\fi
+          \ifnum\x=7 \WhiteRookOnWhite\fi
+        };
+        \node[rotate=\angle] at (\xpos, \fpeval{(6/11)*(5/2)}) {
+          \small
+          \ifnum\x=0 \WhitePawnOnWhite\fi
+          \ifnum\x=1 \WhitePawnOnBlack\fi
+          \ifnum\x=2 \WhitePawnOnWhite\fi
+          \ifnum\x=3 \WhitePawnOnBlack\fi
+          \ifnum\x=4 \WhitePawnOnWhite\fi
+          \ifnum\x=5 \WhitePawnOnBlack\fi
+          \ifnum\x=6 \WhitePawnOnWhite\fi
+          \ifnum\x=7 \WhitePawnOnBlack\fi
+        };
+      }
+    \end{scope}
+  }
+
+\end{tikzpicture}
+
+\end{document}

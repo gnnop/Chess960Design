@@ -8,44 +8,33 @@
 \pagestyle{empty}
 
 \definecolor{lightgray}{gray}{0.8}
-\definecolor{darkgray}{gray}{0.8}
+\definecolor{darkgray}{gray}{0.7}
 
 \begin{document}
 \centering
-\begin{tikzpicture}[x=0.5in,y=0.5in,
-    % Define a style for our waypoints (optional, but good for visualization)
-    waypoint/.style={
-        circle,
-        fill,
-        inner sep=0.5pt
-    },
-    % Define a style for the bent arrow
-    bentArrow/.style={
-        ->, % Arrow tip at the end of the path
-        thick,
-        rounded corners=8pt, % Makes the bends look smooth
-        color=red
-    }
-]
+\begin{tikzpicture}[x=0.5in,y=0.5in]
   % Set explicit bounding box
   \useasboundingbox (0,0) rectangle (6,6);
   \def\cardsize{6}
-  \def\squaresize{\fpeval{6/11}} % Size of each square
+  \pgfmathsetmacro{\squaresize}{6/11} % Size of each square
   
-  \node[align=center] at (3 , 3) {\textbf{CHESS}\\ \textbf{960}};
-
-  % Loop through 4 corners with rotations: 0°, 90°, 180°, 270°
-  \foreach \corner in {0,1,2,3} {
+  \node[align=center] at (3 , 3) {\LARGE \textbf{CHESS}\\~\\ \LARGE \textbf{960}};
+  
+  % The inner list with piece list expanded directly
+\def\wholeCard{0/{0/\WhiteRookOnBlack,1/\WhiteKnightOnWhite,2/\WhiteBishopOnBlack,3/\WhiteQueenOnWhite,4/\WhiteKingOnBlack,5/\WhiteBishopOnWhite,6/\WhiteKnightOnBlack,7/\WhiteRookOnWhite}/0/7/4,1/{0/\WhiteRookOnBlack,1/\WhiteKnightOnWhite,2/\WhiteBishopOnBlack,3/\WhiteQueenOnWhite,4/\WhiteKingOnBlack,5/\WhiteBishopOnWhite,6/\WhiteKnightOnBlack,7/\WhiteRookOnWhite}/0/7/4,2/{0/\WhiteRookOnBlack,1/\WhiteKnightOnWhite,2/\WhiteBishopOnBlack,3/\WhiteQueenOnWhite,4/\WhiteKingOnBlack,5/\WhiteBishopOnWhite,6/\WhiteKnightOnBlack,7/\WhiteRookOnWhite}/0/7/4,3/{0/\WhiteRookOnBlack,1/\WhiteKnightOnWhite,2/\WhiteBishopOnBlack,3/\WhiteQueenOnWhite,4/\WhiteKingOnBlack,5/\WhiteBishopOnWhite,6/\WhiteKnightOnBlack,7/\WhiteRookOnWhite}/0/7/4}
+  
+  % Loop through 4 corners with rotations
+  \foreach \corner/\pieceSetup/\lRook/\rRook/\king in \wholeCard {
     \pgfmathtruncatemacro{\angle}{\corner * 90}
-    % Determine corner positions: (0,0), (6,0), (6,6), (0,6)
+    % Determine corner positions
     \pgfmathsetmacro{\cornerx}{(\corner==1 || \corner==2) ? \cardsize : 0}
     \pgfmathsetmacro{\cornery}{(\corner==2 || \corner==3) ? \cardsize : 0}
 
     \begin{scope}[rotate around={\angle:(\cornerx,\cornery)}, shift={(\cornerx,\cornery)}]
-      % Draw chess setup starting from (0,0) going right
-      \foreach \x in {0,...,7} {
+      % Draw chess setup
+      \foreach \x/\piece in \pieceSetup {
         \pgfmathsetmacro{\xpos}{\x * \squaresize + \squaresize/2}
-        % Draw squares (2 rows)
+        % Draw squares
         \pgfmathtruncatemacro{\colormod}{mod(\x,2)}
         \ifnum\colormod=0
           \fill[darkgray] (\x*\squaresize, 1*\squaresize) rectangle (\x*\squaresize+\squaresize, 2*\squaresize);
@@ -54,97 +43,23 @@
           \fill[lightgray] (\x*\squaresize, 1*\squaresize) rectangle (\x*\squaresize+\squaresize, 2*\squaresize);
           \fill[darkgray] (\x*\squaresize, 2*\squaresize) rectangle (\x*\squaresize+\squaresize, 3*\squaresize);
         \fi
-        % Place pieces on squares with white backgrounds
-        \node[rotate=\angle] at (\xpos, \fpeval{(6/11)*(3/2)}) {
+        % Place pieces
+        \node[rotate=\angle] at (\xpos, {(6/11)*(3/2)}) {\small \piece};
+        \node[rotate=\angle] at (\xpos, {(6/11)*(5/2)}) {
           \small
-          \ifnum\x=0 \WhiteRookOnBlack\fi
-          \ifnum\x=1 \WhiteKnightOnWhite\fi
-          \ifnum\x=2 \WhiteBishopOnBlack\fi
-          \ifnum\x=3 \WhiteQueenOnWhite\fi
-          \ifnum\x=4 \WhiteKingOnBlack\fi
-          \ifnum\x=5 \WhiteBishopOnWhite\fi
-          \ifnum\x=6 \WhiteKnightOnBlack\fi
-          \ifnum\x=7 \WhiteRookOnWhite\fi
-        };
-        \node[rotate=\angle] at (\xpos, \fpeval{(6/11)*(5/2)}) {
-          \small
-          \ifnum\x=0 \WhitePawnOnWhite\fi
-          \ifnum\x=1 \WhitePawnOnBlack\fi
-          \ifnum\x=2 \WhitePawnOnWhite\fi
-          \ifnum\x=3 \WhitePawnOnBlack\fi
-          \ifnum\x=4 \WhitePawnOnWhite\fi
-          \ifnum\x=5 \WhitePawnOnBlack\fi
-          \ifnum\x=6 \WhitePawnOnWhite\fi
-          \ifnum\x=7 \WhitePawnOnBlack\fi
+          \ifnum\colormod=0 \WhitePawnOnWhite\else\WhitePawnOnBlack\fi
         };
       }
-
-      % Castling indicators (arrows showing piece movements)
-      % Queenside: King (x=4) → c-file (x=2), Rook (x=0) → d-file (x=3)
-      % Kingside: King (x=4) → g-file (x=6), Rook (x=7) → f-file (x=5)
-      \foreach \startfile/\endfile in {4/6} {
+     
+      % Castling indicators
+      \foreach \startfile/\endfile/\offset/\direction in {\king/2/0.3/->,\king/6/0.5/->,\lRook/3/0.4/->,\rRook/5/0.6/->} {
         \pgfmathsetmacro{\startx}{\startfile * \squaresize + \squaresize/2}
-        \pgfmathsetmacro{\starty}{1*\squaresize}
+        \pgfmathsetmacro{\neary}{1*\squaresize}
         \pgfmathsetmacro{\endx}{\endfile * \squaresize + \squaresize/2}
-        \pgfmathsetmacro{\endy}{1*\squaresize}
-        \pgfmathsetmacro{\midy}{0.7*\squaresize}
-
-        % --- Define some waypoints using nodes ---
-        \node[waypoint] (P1) at (\startx, \starty) {};
-        \node[waypoint] (P2) at (\startx, \midy) {};
-        \node[waypoint] (P3) at (\endx, \midy) {};
-        \node[waypoint] (P4) at (\endx, \endy) {};
+        \pgfmathsetmacro{\midy}{\offset*\squaresize}
     
-        \draw[bentArrow, thick, rotate=\angle] (P1) -- (P2) -- (P3) -- (P4);
+        \draw[\direction,line width=0.3mm,rounded corners=5pt] (\startx, \neary) -- (\startx, \midy) -- (\endx, \midy) -- (\endx, \neary);
       }
-      
-      \foreach \startfile/\endfile in {7/5} {
-        \pgfmathsetmacro{\startx}{\startfile * \squaresize + \squaresize/2}
-        \pgfmathsetmacro{\starty}{1*\squaresize}
-        \pgfmathsetmacro{\endx}{\endfile * \squaresize + \squaresize/2}
-        \pgfmathsetmacro{\endy}{1*\squaresize}
-        \pgfmathsetmacro{\midy}{0.6*\squaresize}
-
-        % --- Define some waypoints using nodes ---
-        \node[waypoint] (P1) at (\startx, \starty) {};
-        \node[waypoint] (P2) at (\startx, \midy) {};
-        \node[waypoint] (P3) at (\endx, \midy) {};
-        \node[waypoint] (P4) at (\endx, \endy) {};
-    
-        \draw[bentArrow, thick, rotate=\angle] (P1) -- (P2) -- (P3) -- (P4);
-      }
-      
-      \foreach \startfile/\endfile in {4/2, 0/3} {
-        \pgfmathsetmacro{\startx}{\startfile * \squaresize + \squaresize/2}
-        \pgfmathsetmacro{\starty}{1*\squaresize}
-        \pgfmathsetmacro{\endx}{\endfile * \squaresize + \squaresize/2}
-        \pgfmathsetmacro{\endy}{1*\squaresize}
-        \pgfmathsetmacro{\midy}{0.5*\squaresize}
-
-        % --- Define some waypoints using nodes ---
-        \node[waypoint] (P1) at (\startx, \starty) {};
-        \node[waypoint] (P2) at (\startx, \midy) {};
-        \node[waypoint] (P3) at (\endx, \midy) {};
-        \node[waypoint] (P4) at (\endx, \endy) {};
-    
-        \draw[bentArrow, thick, rotate=\angle] (P1) -- (P2) -- (P3) -- (P4);
-      }
-      
-      \foreach \startfile/\endfile in {4/2} {
-        \pgfmathsetmacro{\startx}{\startfile * \squaresize + \squaresize/2}
-        \pgfmathsetmacro{\starty}{1*\squaresize}
-        \pgfmathsetmacro{\endx}{\endfile * \squaresize + \squaresize/2}
-        \pgfmathsetmacro{\endy}{1*\squaresize}
-        \pgfmathsetmacro{\midy}{0.4*\squaresize}
-
-        % --- Define some waypoints using nodes ---
-        \node[waypoint] (P1) at (\startx, \starty) {};
-        \node[waypoint] (P2) at (\startx, \midy) {};
-        \node[waypoint] (P3) at (\endx, \midy) {};
-        \node[waypoint] (P4) at (\endx, \endy) {};
-    
-        \draw[bentArrow, thick, rotate=\angle] (P1) -- (P2) -- (P3) -- (P4);
-     }
     \end{scope}
   }
 

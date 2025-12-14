@@ -32,6 +32,7 @@
 
     \begin{scope}[rotate around={\angle:(\cornerx,\cornery)}, shift={(\cornerx,\cornery)}]
       % Draw chess setup
+          
       \foreach \x/\piece in \pieceSetup {
         \pgfmathsetmacro{\xpos}{\x * \squaresize + \squaresize/2}
         % Draw squares
@@ -52,14 +53,26 @@
       }
      
       % Castling indicators
-      \foreach \startfile/\endfile/\offset/\direction in {\king/2/0.3/->,\king/6/0.5/->,\lRook/3/0.4/->,\rRook/5/0.6/->} {
-        \pgfmathsetmacro{\startx}{\startfile * \squaresize + \squaresize/2}
+      \foreach \startfile/\endfile/\offset/\kingset in {\king/2/0.25/-0.25,\king/6/0.625/0.25,\lRook/3/0.375/0.0,\rRook/5/0.75/0.0} {
+        \pgfmathsetmacro{\startx}{\startfile * \squaresize + \squaresize/2 + \squaresize * \kingset}
         \pgfmathsetmacro{\neary}{1*\squaresize}
-        \pgfmathsetmacro{\endx}{\endfile * \squaresize + \squaresize/2}
+        \pgfmathsetmacro{\endx}{\endfile * \squaresize + \squaresize/2 + \squaresize * \kingset}
         \pgfmathsetmacro{\midy}{\offset*\squaresize}
-    
-        \draw[\direction,line width=0.3mm,rounded corners=5pt] (\startx, \neary) -- (\startx, \midy) -- (\endx, \midy) -- (\endx, \neary);
+        \pgfmathsetmacro{\leftOrth}{\startfile * \squaresize +  \squaresize *0.1 + \squaresize * \kingset}
+        \pgfmathsetmacro{\rightOrth}{\startfile * \squaresize + \squaresize *0.9 + \squaresize * \kingset}
+         
+        \ifdim\startx pt=\endx pt
+          %In this special case, the piece doesn't move. We put a T there to indicate that
+          \draw[line width=0.25mm] (\startx, \neary) -- (\startx, \midy);
+          %The orthogonal segment
+          \draw[line width=0.25mm] (\leftOrth, \midy) -- (\rightOrth, \midy);
+        \else
+          \draw[line width=0.25mm,rounded corners=5pt] (\startx, \neary) -- (\startx, \midy) -- (\endx, \midy) -- (\endx, \neary);
+          \draw[->, line width=0.25mm] (\endx, \neary) -- (\endx, \neary + 0.05);
+        \fi
       }
+      
+      \draw[line width=0.25mm] (0.0, 3*\squaresize) -- (8*\squaresize, 3*\squaresize) -- (8*\squaresize, 0.0);
     \end{scope}
   }
 

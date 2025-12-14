@@ -1,7 +1,4 @@
 *.log
 *.gz
 *.aux
-*.pdf
-deckTex/
 deckIntermediate/
-deckPDF/

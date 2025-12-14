@@ -1,0 +1,81 @@
+\documentclass[12pt]{article}
+\usepackage[margin=0.0in,paperwidth=3in,paperheight=3in]{geometry}
+\usepackage{tikz}
+\usepackage{xskak}
+\usepackage{graphicx}
+\usetikzlibrary{positioning, chains, arrows.meta, shapes.geometric}
+
+\pagestyle{empty}
+
+\definecolor{lightgray}{gray}{0.8}
+\definecolor{darkgray}{gray}{0.7}
+
+\begin{document}
+\centering
+\begin{tikzpicture}[x=0.5in,y=0.5in]
+  % Set explicit bounding box
+  \useasboundingbox (0,0) rectangle (6,6);
+  \def\cardsize{6}
+  \pgfmathsetmacro{\squaresize}{6/11} % Size of each square
+  
+  \node[align=center] at (3 , 3) {\LARGE \textbf{CHESS}\\~\\ \LARGE \textbf{960}};
+  
+  % The inner list with piece list expanded directly
+\def\wholeCard{0/{0/\WhiteBishopOnBlack,1/\WhiteRookOnWhite,2/\WhiteBishopOnBlack,3/\WhiteKingOnWhite,4/\WhiteKnightOnBlack,5/\WhiteRookOnWhite,6/\WhiteQueenOnBlack,7/\WhiteKnightOnWhite}/1/5/3,1/{0/\WhiteBishopOnBlack,1/\WhiteRookOnWhite,2/\WhiteBishopOnBlack,3/\WhiteKingOnWhite,4/\WhiteQueenOnBlack,5/\WhiteKnightOnWhite,6/\WhiteKnightOnBlack,7/\WhiteRookOnWhite}/1/7/3,2/{0/\WhiteBishopOnBlack,1/\WhiteRookOnWhite,2/\WhiteBishopOnBlack,3/\WhiteKingOnWhite,4/\WhiteQueenOnBlack,5/\WhiteKnightOnWhite,6/\WhiteRookOnBlack,7/\WhiteKnightOnWhite}/1/6/3,3/{0/\WhiteBishopOnBlack,1/\WhiteRookOnWhite,2/\WhiteBishopOnBlack,3/\WhiteKingOnWhite,4/\WhiteQueenOnBlack,5/\WhiteRookOnWhite,6/\WhiteKnightOnBlack,7/\WhiteKnightOnWhite}/1/5/3}
+  
+  % Loop through 4 corners with rotations
+  \foreach \corner/\pieceSetup/\lRook/\rRook/\king in \wholeCard {
+    \pgfmathtruncatemacro{\angle}{\corner * 90}
+    % Determine corner positions
+    \pgfmathsetmacro{\cornerx}{(\corner==1 || \corner==2) ? \cardsize : 0}
+    \pgfmathsetmacro{\cornery}{(\corner==2 || \corner==3) ? \cardsize : 0}
+
+    \begin{scope}[rotate around={\angle:(\cornerx,\cornery)}, shift={(\cornerx,\cornery)}]
+      % Draw chess setup
+          
+      \foreach \x/\piece in \pieceSetup {
+        \pgfmathsetmacro{\xpos}{\x * \squaresize + \squaresize/2}
+        % Draw squares
+        \pgfmathtruncatemacro{\colormod}{mod(\x,2)}
+        \ifnum\colormod=0
+          \fill[darkgray] (\x*\squaresize, 1*\squaresize) rectangle (\x*\squaresize+\squaresize, 2*\squaresize);
+          \fill[lightgray] (\x*\squaresize, 2*\squaresize) rectangle (\x*\squaresize+\squaresize, 3*\squaresize);
+        \else
+          \fill[lightgray] (\x*\squaresize, 1*\squaresize) rectangle (\x*\squaresize+\squaresize, 2*\squaresize);
+          \fill[darkgray] (\x*\squaresize, 2*\squaresize) rectangle (\x*\squaresize+\squaresize, 3*\squaresize);
+        \fi
+        % Place pieces
+        \node[rotate=\angle] at (\xpos, {(6/11)*(3/2)}) {\small \piece};
+        \node[rotate=\angle] at (\xpos, {(6/11)*(5/2)}) {
+          \small
+          \ifnum\colormod=0 \WhitePawnOnWhite\else\WhitePawnOnBlack\fi
+        };
+      }
+     
+      % Castling indicators
+      \foreach \startfile/\endfile/\offset/\kingset in {\king/2/0.25/-0.25,\king/6/0.625/0.25,\lRook/3/0.375/0.0,\rRook/5/0.75/0.0} {
+        \pgfmathsetmacro{\startx}{\startfile * \squaresize + \squaresize/2 + \squaresize * \kingset}
+        \pgfmathsetmacro{\neary}{1*\squaresize}
+        \pgfmathsetmacro{\endx}{\endfile * \squaresize + \squaresize/2 + \squaresize * \kingset}
+        \pgfmathsetmacro{\midy}{\offset*\squaresize}
+        \pgfmathsetmacro{\leftOrth}{\startfile * \squaresize +  \squaresize *0.1 + \squaresize * \kingset}
+        \pgfmathsetmacro{\rightOrth}{\startfile * \squaresize + \squaresize *0.9 + \squaresize * \kingset}
+         
+        \ifdim\startx pt=\endx pt
+          %In this special case, the piece doesn't move. We put a T there to indicate that
+          \draw[line width=0.25mm] (\startx, \neary) -- (\startx, \midy);
+          %The orthogonal segment
+          \draw[line width=0.25mm] (\leftOrth, \midy) -- (\rightOrth, \midy);
+        \else
+          \draw[line width=0.25mm,rounded corners=5pt] (\startx, \neary) -- (\startx, \midy) -- (\endx, \midy) -- (\endx, \neary);
+          \draw[->, line width=0.25mm] (\endx, \neary) -- (\endx, \neary + 0.05);
+        \fi
+      }
+      
+      \draw[line width=0.25mm] (0.0, 3*\squaresize) -- (8*\squaresize, 3*\squaresize) -- (8*\squaresize, 0.0);
+    \end{scope}
+  }
+
+\end{tikzpicture}
+
+\end{document}

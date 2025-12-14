@@ -1,1 +1,4 @@
 I copyright/patent this. This is a copyleft product unless express permission is granted. So, unless express permission is granted, you may not use this in any way to make money.
+
+
+Feel completely free to use it casually though!!
